@@ -1,55 +1,64 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import json
-import os
-import sys
+import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 try:
     from netmod.config import list_configs, load_config
     from netmod.vpn import NetModVPN
     from netmod.payload import get_default_payloads
     from netmod.trojan_tunnel import TrojanTunnel
+    from netmod.vless_tunnel import VlessTunnel
 except:
     from config import list_configs, load_config
     from vpn import NetModVPN
     from payload import get_default_payloads
     from trojan_tunnel import TrojanTunnel
+    from vless_tunnel import VlessTunnel
 
 class NetModGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Zorin NetMod VPN - NetMod-like VPN for Linux + Trojan")
-        self.root.geometry("800x700")
+        self.root.title("Zorin NetMod VPN - Trojan + VLESS + SSH/WS")
+        self.root.geometry("850x750")
         self.vpn = None
-
-        ttk.Label(root, text="🌀 Zorin NetMod VPN + Trojan", font=("Arial", 18, "bold")).pack(pady=10)
-        ttk.Label(root, text="SSH/SSL/WebSocket/Trojan - NetMod-like for Zorin OS", font=("Arial", 10)).pack()
-
-        # Trojan quick connect
-        trojan_frame = ttk.LabelFrame(root, text="Trojan Quick Connect (NetMod eke hodatama wada)")
-        trojan_frame.pack(fill=tk.X, padx=20, pady=10)
-        ttk.Label(trojan_frame, text="Trojan URL:").pack(anchor=tk.W, padx=5)
-        self.trojan_entry = ttk.Entry(trojan_frame, width=80)
+        ttk.Label(root, text="🌀 Zorin NetMod VPN + Trojan + VLESS", font=("Arial", 16, "bold")).pack(pady=10)
+        
+        # Trojan
+        tf = ttk.LabelFrame(root, text="Trojan Quick Connect - Hodatama Wada")
+        tf.pack(fill=tk.X, padx=20, pady=5)
+        ttk.Label(tf, text="Trojan URL:").pack(anchor=tk.W, padx=5)
+        self.trojan_entry = ttk.Entry(tf, width=80)
         self.trojan_entry.insert(0, "trojan://1a23c3c4-1665-41d1-9c3c-3df4bb9933c9@us.cloudnet.one:443?type=tcp&security=tls&sni=aka.ms#US-1")
-        self.trojan_entry.pack(fill=tk.X, padx=5, pady=5)
-        btn_frame = ttk.Frame(trojan_frame)
-        btn_frame.pack(fill=tk.X, padx=5, pady=5)
-        ttk.Button(btn_frame, text="Test Trojan", command=self.test_trojan).pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Connect Trojan", command=self.connect_trojan).pack(side=tk.LEFT, padx=5)
+        self.trojan_entry.pack(fill=tk.X, padx=5, pady=2)
+        bf = ttk.Frame(tf)
+        bf.pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(bf, text="Test Trojan", command=self.test_trojan).pack(side=tk.LEFT, padx=2)
+        ttk.Button(bf, text="Connect Trojan", command=self.connect_trojan).pack(side=tk.LEFT, padx=2)
 
-        # Config list
+        # VLESS
+        vf = ttk.LabelFrame(root, text="VLESS Quick Connect - Hodatama Wada")
+        vf.pack(fill=tk.X, padx=20, pady=5)
+        ttk.Label(vf, text="VLESS URL:").pack(anchor=tk.W, padx=5)
+        self.vless_entry = ttk.Entry(vf, width=80)
+        self.vless_entry.insert(0, "vless://59a46450-0992-4157-8c45-91315ed2fb1b@sgping.cloudnet-movies.win:443?encryption=none&type=tcp&security=tls&sni=aka.ms#User6419")
+        self.vless_entry.pack(fill=tk.X, padx=5, pady=2)
+        bf2 = ttk.Frame(vf)
+        bf2.pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(bf2, text="Test VLESS", command=self.test_vless).pack(side=tk.LEFT, padx=2)
+        ttk.Button(bf2, text="Connect VLESS", command=self.connect_vless).pack(side=tk.LEFT, padx=2)
+
+        # Configs
         frame = ttk.Frame(root)
         frame.pack(fill=tk.X, padx=20, pady=5)
-        ttk.Label(frame, text="Or SSH/WS Config:").pack(anchor=tk.W)
+        ttk.Label(frame, text="SSH/WS Config:").pack(anchor=tk.W)
         self.config_var = tk.StringVar()
         self.config_combo = ttk.Combobox(frame, textvariable=self.config_var, width=60)
         self.refresh_configs()
-        self.config_combo.pack(fill=tk.X, pady=5)
-        btn_frame2 = ttk.Frame(frame)
-        btn_frame2.pack(fill=tk.X)
-        ttk.Button(btn_frame2, text="Refresh", command=self.refresh_configs).pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame2, text="Load", command=self.load_selected).pack(side=tk.LEFT, padx=5)
+        self.config_combo.pack(fill=tk.X, pady=2)
+        bf3 = ttk.Frame(frame)
+        bf3.pack(fill=tk.X)
+        ttk.Button(bf3, text="Refresh", command=self.refresh_configs).pack(side=tk.LEFT, padx=2)
+        ttk.Button(bf3, text="Load", command=self.load_selected).pack(side=tk.LEFT, padx=2)
 
         # Fields
         fields_frame = ttk.LabelFrame(root, text="Config Details")
@@ -67,12 +76,11 @@ class NetModGUI:
         # Buttons
         action_frame = ttk.Frame(root)
         action_frame.pack(fill=tk.X, padx=20, pady=5)
-        self.start_btn = ttk.Button(action_frame, text="START VPN", command=self.start_vpn)
-        self.start_btn.pack(side=tk.LEFT, padx=5, ipadx=20)
+        ttk.Button(action_frame, text="START VPN", command=self.start_vpn).pack(side=tk.LEFT, padx=5, ipadx=20)
         ttk.Button(action_frame, text="STOP", command=self.stop_vpn).pack(side=tk.LEFT, padx=5)
 
         # Log
-        log_frame = ttk.LabelFrame(root, text="Log - Trojan SNI aka.ms tested working!")
+        log_frame = ttk.LabelFrame(root, text="Log - Trojan & VLESS Tested Working! SNI aka.ms")
         log_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
         self.log_text = tk.Text(log_frame, height=12, font=("Monospace", 9))
         self.log_text.pack(fill=tk.BOTH, expand=True)
@@ -112,22 +120,39 @@ class NetModGUI:
         try:
             t=TrojanTunnel(url)
             ok=t.connect("1.1.1.1", 80)
-            if ok:
-                self.log("✅ Trojan TLS handshake OK with SNI aka.ms, tunnel established! NetMod wage wada!")
-            else:
-                self.log("❌ Trojan failed")
+            self.log("✅ Trojan TLS OK SNI aka.ms, tunnel established! Hodatama wada!" if ok else "❌ Failed")
         except Exception as e:
             self.log(f"Error: {e}")
 
     def connect_trojan(self):
         url=self.trojan_entry.get()
-        if not url: return
-        self.log(f"Connecting Trojan: {url[:60]}...")
         try:
             t=TrojanTunnel(url)
             if t.connect("8.8.8.8",53):
-                self.log("✅ Trojan connected! SOCKS 127.0.0.1:1080 via Trojan")
+                self.log("✅ Trojan connected! SOCKS 127.0.0.1:1080")
                 messagebox.showinfo("Trojan", "Connected! SOCKS 127.0.0.1:1080")
+            else:
+                self.log("❌ Failed")
+        except Exception as e:
+            self.log(f"Error {e}")
+
+    def test_vless(self):
+        url=self.vless_entry.get()
+        self.log(f"Testing VLESS: {url[:60]}...")
+        try:
+            t=VlessTunnel(url)
+            ok=t.connect("1.1.1.1", 80)
+            self.log("✅ VLESS TLS OK SNI aka.ms, tunnel established! Hodatama wada!" if ok else "❌ Failed")
+        except Exception as e:
+            self.log(f"Error: {e}")
+
+    def connect_vless(self):
+        url=self.vless_entry.get()
+        try:
+            t=VlessTunnel(url)
+            if t.connect("8.8.8.8",53):
+                self.log("✅ VLESS connected! SOCKS 127.0.0.1:1080")
+                messagebox.showinfo("VLESS", "Connected! SOCKS 127.0.0.1:1080")
             else:
                 self.log("❌ Failed")
         except Exception as e:
@@ -143,6 +168,8 @@ class NetModGUI:
         if self.vpn:
             self.vpn.stop()
             self.log("Stopped")
+        else:
+            self.log("No VPN running")
 
     def log(self, msg):
         self.log_text.insert(tk.END, msg+"\n")

@@ -1,0 +1,16 @@
+{
+  "name": "Free Internet - Dialog Example (Educational)",
+  "ssh_host": "sg1.sshdropbear.net",
+  "ssh_port": 443,
+  "ssh_user": "your-ssh-username",
+  "ssh_pass": "your-ssh-password",
+  "tunnel_type": "ws-ssl",
+  "bug_host": "www.dialog.lk",
+  "sni": "www.dialog.lk",
+  "payload": "GET / HTTP/1.1[crlf]Host: [host][crlf]X-Online-Host: [host][crlf]Connection: Keep-Alive[crlf]User-Agent: [ua][crlf][crlf]",
+  "ws_path": "/",
+  "proxy_port": 8888,
+  "socks_port": 1080,
+  "dns": "1.1.1.1",
+  "notes": "Replace Dialog bug host with your ISP free host. Use your own SSH account from sshdropbear.net or similar. Educational only."
+}

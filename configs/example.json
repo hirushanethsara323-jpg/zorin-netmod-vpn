@@ -1,0 +1,15 @@
+{
+  "name": "Example - Direct SSH",
+  "ssh_host": "sg1.sshdropbear.net",
+  "ssh_port": 443,
+  "ssh_user": "your-ssh-username",
+  "ssh_pass": "your-ssh-password",
+  "tunnel_type": "ssh",
+  "bug_host": "",
+  "sni": "",
+  "payload": "",
+  "ws_path": "/",
+  "proxy_port": 8888,
+  "socks_port": 1080,
+  "dns": "1.1.1.1"
+}

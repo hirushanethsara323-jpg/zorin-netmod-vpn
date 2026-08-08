@@ -5,18 +5,28 @@ from .config import load_config, list_configs, get_example_config
 from .vpn import NetModVPN
 from .trojan_tunnel import TrojanTunnel
 from .vless_tunnel import VlessTunnel
+from .vmess_tunnel import VmessTunnel
+from .shadowsocks_tunnel import SSTunnel
+from .subscription import fetch_subscription
+from .speedtest import speedtest_proxies
 
 def main():
-    parser = argparse.ArgumentParser(description="Zorin NetMod VPN - SSH/SSL/WS/Trojan/VLESS for Linux")
+    parser = argparse.ArgumentParser(description="Zorin NetMod VPN - All Protocols: SSH/SSL/WS/Trojan/VLESS/VMess/SS - Okkoma Hodatama")
     parser.add_argument('--config', '-c', help='Config file path (JSON)')
     parser.add_argument('--trojan', help='Trojan URL trojan://...')
     parser.add_argument('--vless', help='VLESS URL vless://...')
+    parser.add_argument('--vmess', help='VMess URL vmess://...')
+    parser.add_argument('--ss', help='Shadowsocks URL ss://...')
     parser.add_argument('--start', action='store_true', help='Start VPN')
     parser.add_argument('--gui', action='store_true', help='Open GUI')
     parser.add_argument('--list-configs', action='store_true', help='List configs')
     parser.add_argument('--create-example', action='store_true', help='Create example config')
     parser.add_argument('--test-trojan', help='Test Trojan URL')
     parser.add_argument('--test-vless', help='Test VLESS URL')
+    parser.add_argument('--test-vmess', help='Test VMess URL')
+    parser.add_argument('--test-ss', help='Test SS URL')
+    parser.add_argument('--sub', help='Fetch subscription URL (base64 list of proxies)')
+    parser.add_argument('--speedtest', action='store_true', help='Speedtest all configs')
     args = parser.parse_args()
 
     if args.list_configs:
@@ -34,6 +44,49 @@ def main():
         print("Created configs/example.json")
         return
 
+    if args.sub:
+        urls = fetch_subscription(args.sub)
+        print(f"\nFetched {len(urls)} proxies from subscription:")
+        for u in urls[:10]:
+            print(f"  {u[:80]}...")
+        # Save to file
+        with open("configs/subscription.txt", "w") as f:
+            for u in urls:
+                f.write(u + "\n")
+        print("Saved to configs/subscription.txt")
+        return
+
+    if args.speedtest:
+        configs = list_configs()
+        proxies = []
+        for cfg_path in configs:
+            try:
+                cfg = load_config(cfg_path)
+                # Try to get host/port from config or parse trojan/vless if it's a txt with URLs
+            except:
+                pass
+        # Also check subscription.txt
+        if os.path.exists("configs/subscription.txt"):
+            with open("configs/subscription.txt") as f:
+                for line in f:
+                    line=line.strip()
+                    if '://' in line:
+                        # Parse host/port quickly
+                        try:
+                            from urllib.parse import urlparse
+                            p=urlparse(line)
+                            proxies.append({"host": p.hostname, "port": p.port or 443, "name": line[:30], "url": line})
+                        except:
+                            pass
+        if proxies:
+            results = speedtest_proxies(proxies[:10])
+            print("\nSpeedtest sorted:")
+            for latency, proxy in results:
+                print(f"  {latency:.0f}ms - {proxy['name']}")
+        else:
+            print("No proxies to speedtest, use --sub first")
+        return
+
     if args.test_trojan:
         t = TrojanTunnel(args.test_trojan)
         t.connect()
@@ -42,14 +95,29 @@ def main():
         t = VlessTunnel(args.test_vless)
         t.connect()
         return
+    if args.test_vmess:
+        t = VmessTunnel(args.test_vmess)
+        t.connect()
+        return
+    if args.test_ss:
+        t = SSTunnel(args.test_ss)
+        t.connect()
+        return
 
     if args.trojan:
         t = TrojanTunnel(args.trojan)
         t.connect()
         return
-
     if args.vless:
         t = VlessTunnel(args.vless)
+        t.connect()
+        return
+    if args.vmess:
+        t = VmessTunnel(args.vmess)
+        t.connect()
+        return
+    if args.ss:
+        t = SSTunnel(args.ss)
         t.connect()
         return
 
@@ -74,8 +142,10 @@ def main():
         print("  netmod --config configs/example.json --start")
         print("  netmod --trojan 'trojan://...' --start")
         print("  netmod --vless 'vless://...' --start")
-        print("  netmod --test-trojan 'trojan://...'")
-        print("  netmod --test-vless 'vless://...'")
+        print("  netmod --vmess 'vmess://...' --start")
+        print("  netmod --ss 'ss://...' --start")
+        print("  netmod --sub https://example.com/sub.txt")
+        print("  netmod --speedtest")
         print("  netmod --gui")
 
 if __name__ == "__main__":

@@ -202,3 +202,67 @@ netmod --gui # All protocols in GUI
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/hirushanethsara323-jpg/zorin-netmod-vpn/main/install.sh)"
 ```
+---
+
+## 📦 AppImage - Single File, No Install, GUI Only, Terminal Nathi!
+
+**User Request:** "Mata appimage ekak okata hadannako" - AppImage haduwa!
+
+**Download & Run - Zorin OS eke one command:**
+
+```bash
+# Download AppImage
+wget https://github.com/hirushanethsara323-jpg/zorin-netmod-vpn/releases/download/v2.0/Zorin-NetMod-VPN-x86_64.AppImage
+
+# Make executable
+chmod +x Zorin-NetMod-VPN-x86_64.AppImage
+
+# Run GUI only, terminal nathiwa!
+./Zorin-NetMod-VPN-x86_64.AppImage
+# or
+./Zorin-NetMod-VPN-x86_64.AppImage --gui
+```
+
+**AppImage Features:**
+- Single file 210K, no install needed
+- No terminal - GUI only (`Terminal=false`)
+- All protocols: SSH, SSL, WS, Trojan (tested SNI aka.ms working), VLESS (tested working), VMess, SS, Subscription, Speedtest
+- Works on Zorin OS, Ubuntu, any Linux distro
+- No dependencies except python3 + python3-tk + paramiko + websockets (installed via system python)
+- AppRun sets PYTHONPATH to bundled netmod package
+
+**GUI Only Mode:**
+```bash
+nohup ./Zorin-NetMod-VPN-x86_64.AppImage >/dev/null 2>&1 &
+# Terminal close karath GUI thiyenawa!
+```
+
+**Desktop Integration:**
+```bash
+# Extract and integrate to App Menu
+./Zorin-NetMod-VPN-x86_64.AppImage --appimage-extract
+cp squashfs-root/netmod.desktop ~/.local/share/applications/
+update-desktop-database ~/.local/share/applications/
+# Now Super key -> NetMod -> GUI witharai!
+```
+
+**CLI still works via AppImage:**
+```bash
+./Zorin-NetMod-VPN-x86_64.AppImage --cli --help
+./Zorin-NetMod-VPN-x86_64.AppImage --cli --test-trojan "trojan://..."
+./Zorin-NetMod-VPN-x86_64.AppImage --cli --test-vless "vless://..."
+```
+
+**Build AppImage Yourself:**
+```bash
+git clone https://github.com/hirushanethsara323-jpg/zorin-netmod-vpn.git
+cd zorin-netmod-vpn
+# Install appimagetool
+wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+chmod +x appimagetool-x86_64.AppImage
+./appimagetool-x86_64.AppImage --appimage-extract
+# Build
+ARCH=x86_64 ./squashfs-root/AppRun AppDir Zorin-NetMod-VPN-x86_64.AppImage
+```
+
+**Size:** 210K only! (Python app, uses system python3)

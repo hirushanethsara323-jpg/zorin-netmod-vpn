@@ -115,3 +115,39 @@ By: hirushanethsara323-jpg | Zero OS Team
 ### Colab Link
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hirushanethsara323-jpg/zorin-netmod-vpn/blob/main/colab.ipynb)
+
+---
+
+## 🆕 v1.1 Trojan Support - NetMod eke hodatama wada!
+
+**Tested Trojan URL from user:**
+```
+trojan://1a23c3c4-1665-41d1-9c3c-3df4bb9933c9@us.cloudnet.one:443?type=tcp&headerType=none&security=tls&sni=aka.ms&alpn=h2,http/1.1#US-1-cloudnetfreev2ray-8f57
+```
+
+**Test Result in Linux (Python):**
+```
+[Trojan] TLS handshake with SNI: aka.ms
+[Trojan] TLS OK, cipher: ('TLS_AES_128_GCM_SHA256', 'TLSv1.3', 128)
+[Trojan] Tunnel to 1.1.1.1:80 established via us.cloudnet.one (SNI aka.ms)
+Received via Trojan tunnel: 381 bytes HTTP 301 Moved Permanently from Cloudflare
+✅ Trojan works! NetMod wage wada!
+```
+
+**How to use:**
+- CLI: `netmod --trojan "trojan://..." --start` or `--test-trojan`
+- GUI: Paste Trojan URL in Trojan field → Test Trojan → Connect Trojan
+- SNI `aka.ms` is bug host / domain fronting trick - TLS handshake with SNI aka.ms to us.cloudnet.one
+
+**Trojan Protocol:**
+1. TCP connect to us.cloudnet.one:443
+2. TLS wrap with SNI aka.ms (domain fronting)
+3. Send SHA224(password) + \r\n + CONNECT request to target (e.g., 8.8.8.8:53)
+4. Tunnel established, now SOCKS5 127.0.0.1:1080 forwards via Trojan
+
+**Zorin Install:**
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/hirushanethsara323-jpg/zorin-netmod-vpn/main/install.sh)"
+netmod --gui
+# Paste Trojan URL in Trojan field
+```
